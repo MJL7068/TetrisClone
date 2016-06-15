@@ -17,6 +17,8 @@ public class Tetris extends Timer implements ActionListener {
     private int pieceNumber;
     private String[] tetrominos;
     private int endingY;
+    
+    ArrayList<Block> squaresToUpdate;
 
     public Tetris(int height, int widht) {
         super(500, null);
@@ -25,6 +27,8 @@ public class Tetris extends Timer implements ActionListener {
         this.tetrominos = new String[]{"sblock", "zblock", "tblock", "iblock", "jblock", "lblock", "oblock"};
         this.endingY = -1;
         this.pieceNumber = -1;
+        
+        this.squaresToUpdate = new ArrayList<>();
 
         this.piece = new Piece();
         setPiece();
@@ -70,11 +74,15 @@ public class Tetris extends Timer implements ActionListener {
         }
 
         if (move) {
+            ArrayList<Block> blocks = new ArrayList<>();
             for (Block block : piece.getPiece()) {
                 squares[block.getY()][block.getX()] = 0;
+                blocks.add(new Block(block.getX(), block.getY()));
                 block.move(0, 1);
                 squares[block.getY()][block.getX()] = pieceNumber;
+                blocks.add(new Block(block.getX(), block.getY()));
             }
+            gameBoard.updateSquare(blocks);
         }
     }
 
@@ -87,12 +95,16 @@ public class Tetris extends Timer implements ActionListener {
         }
 
         if (move) {
+            ArrayList<Block> blocks = new ArrayList<>();
             for (int i = 0; i < piece.getPiece().size(); i++) {
                 Block block = piece.getPiece().get(i);
                 squares[block.getY()][block.getX()] = 0;
+                blocks.add(new Block(block.getX(), block.getY()));
                 block.move(-1, 0);
                 squares[block.getY()][block.getX()] = pieceNumber;
+                blocks.add(new Block(block.getX(), block.getY()));
             }
+            gameBoard.updateSquare(blocks);
         }
     }
 
@@ -105,13 +117,17 @@ public class Tetris extends Timer implements ActionListener {
         }
 
         if (move) {
+            ArrayList<Block> blocks = new ArrayList<>();
             for (int i = piece.getPiece().size() - 1; i >= 0; i--) {
                 Block block = piece.getPiece().get(i);
                 squares[block.getY()][block.getX()] = 0;
+                blocks.add(new Block(block.getX(), block.getY()));
                 block.move(1, 0);
                 squares[block.getY()][block.getX()] = pieceNumber;
+                blocks.add(new Block(block.getX(), block.getY()));
             }
-        }
+            gameBoard.updateSquare(blocks);
+        }        
     }
 
     public void rotatePiece() {
@@ -124,16 +140,25 @@ public class Tetris extends Timer implements ActionListener {
         }
 
         if (clear) {
+            ArrayList<Block> blocks = new ArrayList<>();
             for (Block block : piece.getPiece()) {
                 squares[block.getY()][block.getX()] = 0;
-            }
+                blocks.add(new Block(block.getX(), block.getY()));
+            }            
 
             piece.setNewBlocks(newBlocks);
+            for (Block block : newBlocks) {
+                blocks.add(block);
+            }
             updatePiece();
+            gameBoard.updateSquare(blocks);
         } else {
+            ArrayList<Block> blocks = new ArrayList<>();
             for (Block block : piece.getPiece()) {
                 squares[block.getY()][block.getX()] = pieceNumber;
+                blocks.add(new Block(block.getX(), block.getY()));
             }
+            gameBoard.updateSquare(blocks);
         }
     }
 
@@ -181,22 +206,29 @@ public class Tetris extends Timer implements ActionListener {
                 for (int j = 0; j < squares[i].length; j++) {
                     if (squares[i][j] != 0 && !piece.getPiece().contains(new Block(j, i))) {
                         squares[i + 1][j] = squares[i][j];
+                        squaresToUpdate.add(new Block(j, i));
                         squares[i][j] = 0;
+                        squaresToUpdate.add(new Block(j, i));
                     }
                 }
             }
+            //gameBoard.updateSquare(blocks);
         }
     }
 
     public void clearRow(int row) {
         for (int i = 0; i < squares[row].length; i++) {
             squares[row][i] = 0;
+            Block block = new Block(i, row);
+            squaresToUpdate.add(block);
         }
+        
+        //gameBoard.updateSquare(blocks);
     }
 
-    public void updateGameBoard() {
-        gameBoard.update();
-    }
+//    public void updateGameBoard() {
+//        gameBoard.update();
+//    }
 
     public void setPiece() {
         Random r = new Random();
@@ -209,12 +241,15 @@ public class Tetris extends Timer implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         moveDown();
         checkIfEnd();        
-        updateGameBoard();
+//        updateGameBoard();
+        gameBoard.updateSquare(squaresToUpdate);
+        squaresToUpdate.clear();
 
         if (endingY >= 0) {
             checkIfFullRow(endingY);
             endingY = -1;
         }
+               
     }
 
 }

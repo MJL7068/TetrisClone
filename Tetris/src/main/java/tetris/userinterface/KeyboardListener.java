@@ -27,7 +27,7 @@ public class KeyboardListener  implements KeyListener {
             tetris.moveDown();
         }
         
-        tetris.updateGameBoard();        
+//        tetris.updateGameBoard();        
     }
 
     @Override

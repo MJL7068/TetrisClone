@@ -4,12 +4,14 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 import tetris.Tetris;
+import tetris.pieces.Block;
 
 public class GraphicalUserinterface  implements Runnable, Updateable {
 
@@ -69,11 +71,22 @@ public class GraphicalUserinterface  implements Runnable, Updateable {
 
     @Override
     public void update() {
-        for (int i = 0; i < squares.length; i++) {
-            for (int j = 0; j < squares[i].length; j++) {
-                int number = tetris.getSquare(j, i);
-                setColor(squares[i][j], number);
-            }
+//        for (int i = 0; i < squares.length; i++) {
+//            for (int j = 0; j < squares[i].length; j++) {
+//                int number = tetris.getSquare(j, i);
+//                setColor(squares[i][j], number);
+//            }
+//        }
+    }
+    
+    @Override
+    public void updateSquare(ArrayList<Block> blocks) {
+        for (Block block : blocks) {
+            int y = block.getY();
+            int x = block.getX();
+            int number = tetris.getSquare(x, y);
+            setColor(squares[y][x], number);
+            squares[y][x].setText("" + number);
         }
     }
     
