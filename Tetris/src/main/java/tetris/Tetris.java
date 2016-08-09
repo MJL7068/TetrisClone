@@ -18,6 +18,8 @@ public class Tetris extends Timer implements ActionListener {
     private String[] tetrominos;
     private int endingY;
     
+    private int nextPiece;
+    
     ArrayList<Block> squaresToUpdate;
 
     public Tetris(int height, int widht) {
@@ -29,6 +31,8 @@ public class Tetris extends Timer implements ActionListener {
         this.pieceNumber = -1;
         
         this.squaresToUpdate = new ArrayList<>();
+        
+        this.nextPiece = generateNextPieceNumber();
 
         this.piece = new Piece();
         setPiece();
@@ -74,15 +78,11 @@ public class Tetris extends Timer implements ActionListener {
         }
 
         if (move) {
-            ArrayList<Block> blocks = new ArrayList<>();
             for (Block block : piece.getPiece()) {
                 squares[block.getY()][block.getX()] = 0;
-                blocks.add(new Block(block.getX(), block.getY()));
                 block.move(0, 1);
                 squares[block.getY()][block.getX()] = pieceNumber;
-                blocks.add(new Block(block.getX(), block.getY()));
             }
-            gameBoard.updateSquare(blocks);
         }
     }
 
@@ -95,16 +95,12 @@ public class Tetris extends Timer implements ActionListener {
         }
 
         if (move) {
-            ArrayList<Block> blocks = new ArrayList<>();
             for (int i = 0; i < piece.getPiece().size(); i++) {
                 Block block = piece.getPiece().get(i);
                 squares[block.getY()][block.getX()] = 0;
-                blocks.add(new Block(block.getX(), block.getY()));
                 block.move(-1, 0);
                 squares[block.getY()][block.getX()] = pieceNumber;
-                blocks.add(new Block(block.getX(), block.getY()));
             }
-            gameBoard.updateSquare(blocks);
         }
     }
 
@@ -117,16 +113,12 @@ public class Tetris extends Timer implements ActionListener {
         }
 
         if (move) {
-            ArrayList<Block> blocks = new ArrayList<>();
             for (int i = piece.getPiece().size() - 1; i >= 0; i--) {
                 Block block = piece.getPiece().get(i);
                 squares[block.getY()][block.getX()] = 0;
-                blocks.add(new Block(block.getX(), block.getY()));
                 block.move(1, 0);
                 squares[block.getY()][block.getX()] = pieceNumber;
-                blocks.add(new Block(block.getX(), block.getY()));
             }
-            gameBoard.updateSquare(blocks);
         }        
     }
 
@@ -140,25 +132,16 @@ public class Tetris extends Timer implements ActionListener {
         }
 
         if (clear) {
-            ArrayList<Block> blocks = new ArrayList<>();
             for (Block block : piece.getPiece()) {
                 squares[block.getY()][block.getX()] = 0;
-                blocks.add(new Block(block.getX(), block.getY()));
             }            
 
             piece.setNewBlocks(newBlocks);
-            for (Block block : newBlocks) {
-                blocks.add(block);
-            }
             updatePiece();
-            gameBoard.updateSquare(blocks);
         } else {
-            ArrayList<Block> blocks = new ArrayList<>();
             for (Block block : piece.getPiece()) {
                 squares[block.getY()][block.getX()] = pieceNumber;
-                blocks.add(new Block(block.getX(), block.getY()));
             }
-            gameBoard.updateSquare(blocks);
         }
     }
 
@@ -167,7 +150,7 @@ public class Tetris extends Timer implements ActionListener {
             if (block.getY() == squares.length - 1 || (squares[block.getY() + 1][block.getX()] != 0 && !piece.getPiece().contains(new Block(block.getX(), block.getY() + 1)))) {
                 this.endingY = block.getY();
                 checkIfGameOver();
-                setPiece();
+                setPiece();                
                 break;
             }
         }
@@ -183,7 +166,7 @@ public class Tetris extends Timer implements ActionListener {
     }
     
     public void gameOver() {
-        gameBoard.gameOver();
+//        gameBoard.gameOver();
         this.stop();
     }
 
@@ -206,50 +189,51 @@ public class Tetris extends Timer implements ActionListener {
                 for (int j = 0; j < squares[i].length; j++) {
                     if (squares[i][j] != 0 && !piece.getPiece().contains(new Block(j, i))) {
                         squares[i + 1][j] = squares[i][j];
-                        squaresToUpdate.add(new Block(j, i));
                         squares[i][j] = 0;
-                        squaresToUpdate.add(new Block(j, i));
                     }
                 }
             }
-            //gameBoard.updateSquare(blocks);
+
+            gameBoard.update();
         }
     }
 
     public void clearRow(int row) {
         for (int i = 0; i < squares[row].length; i++) {
             squares[row][i] = 0;
-            Block block = new Block(i, row);
-            squaresToUpdate.add(block);
         }
-        
-        //gameBoard.updateSquare(blocks);
+
     }
 
-//    public void updateGameBoard() {
-//        gameBoard.update();
-//    }
-
     public void setPiece() {
-        Random r = new Random();
-        int n = r.nextInt(7);
-        pieceNumber = r.nextInt(7) + 1;
-        piece.setTetromino(tetrominos[n]);
+        pieceNumber = new Random().nextInt(7) + 1;
+        piece.setTetromino(tetrominos[nextPiece]);
+        nextPiece = generateNextPieceNumber();               
+    }
+
+    public String getNextPiece() {
+        return tetrominos[nextPiece];
+    }        
+    
+    public int generateNextPieceNumber() {
+        return new Random().nextInt(7);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        moveDown();
-        checkIfEnd();        
-//        updateGameBoard();
-        gameBoard.updateSquare(squaresToUpdate);
-        squaresToUpdate.clear();
-
         if (endingY >= 0) {
             checkIfFullRow(endingY);
             endingY = -1;
         }
-               
+        
+        moveDown();
+        
+        checkIfEnd();
+        gameBoard.update();      
+    }
+    
+    public void update() {
+        gameBoard.update();
     }
 
 }

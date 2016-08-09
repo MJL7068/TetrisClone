@@ -10,7 +10,17 @@ public class Main {
         
         SwingUtilities.invokeLater(gui);  
         
-        tetris.setGameBoard(gui);
+//        tetris.setGameBoard(gui);
+        
+        while (gui.getDrawBoard() == null) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                System.out.println("Piirtoalustaa ei ole vielä luotu.");
+            }
+        }
+        
+        tetris.setGameBoard(gui.getDrawBoard());
         tetris.start();
     }
     
