@@ -166,7 +166,6 @@ public class Tetris extends Timer implements ActionListener {
     }
     
     public void gameOver() {
-//        gameBoard.gameOver();
         this.stop();
     }
 
@@ -220,15 +219,15 @@ public class Tetris extends Timer implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {                
+        checkIfEnd();
+        
         if (endingY >= 0) {
             checkIfFullRow(endingY);
             endingY = -1;
         }
-        
+
         moveDown();
-        
-        checkIfEnd();
         gameBoard.update();      
     }
     
